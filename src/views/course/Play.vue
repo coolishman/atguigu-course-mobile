@@ -1,19 +1,17 @@
 <template>
   <div>
     <video id="player-container-id" preload="auto" width="600" height="400" playsinline webkit-playsinline x5-playsinline></video>
-    <h1 class="van-ellipsis course_title">{{ course.title }}</h1>
     <div class="course_teacher_price_box">
       <div class="course_teacher_price">
-        <div class="course_price">价格：</div>
-        <div class="course_price_number">￥{{ course.price }}</div>
+        <div class="course_price">课程：</div>
+        <div class="course_teacher_price_box">{{ course.title }}</div>
         <div class="course_teacher">主讲： {{ course.teacherName }}</div>
       </div>
-      <div>
-        <van-button @click="see()" v-if="isBuy" plain type="warning" size="mini">前往观看</van-button>
-        <!-- course.price == '0' 不可替换为 === -->
-        <van-button @click="see()" v-else-if="course.price == '0'" plain type="warning" size="mini">免费观看</van-button>
-        <van-button @click="buy" v-else plain type="warning" size="mini">立即购买</van-button>
-      </div>
+    </div>
+
+    <div class="course_contents">
+      <div class="course_title_font">课程详情</div>
+      <div>{{ course.description }}</div>
     </div>
 
     <div class="course_contents">
@@ -39,8 +37,8 @@
 </template>
 
 <script>
-import courseApi from '../api/course'
-import vodApi from '../api/vod'
+import courseApi from '../../api/course'
+import vodApi from '../../api/vod'
 
 
 export default {
@@ -81,9 +79,6 @@ export default {
     see(video) {
       let videoId = video.id;
       this.getPlayAuth(videoId);
-    },
-    buy() {
-
     },
     getPlayAuth(videoId) {
       if (this.player != null) {

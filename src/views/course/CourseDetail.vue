@@ -32,10 +32,8 @@
         <div class="course_price_number">￥{{ course.price }}</div>
       </div>
       <div>
-        <van-button @click="see()" v-if="isBuy" plain type="warning" size="mini">前往观看</van-button>
         <!-- course.price == '0' 不可替换为 === -->
-        <van-button @click="see()" v-else-if="course.price == '0'" plain type="warning" size="mini">免费观看</van-button>
-        <van-button @click="buy" v-else plain type="warning" size="mini">立即购买</van-button>
+        <van-button @click="buy()" v-show="course.price != '0.00'" plain type="warning" size="mini">购买课程</van-button>
       </div>
     </div>
 
@@ -76,7 +74,7 @@
 
 
 <script>
-import courseApi from '../api/course'
+import courseApi from '../../api/course'
 
 export default {
   data() {
@@ -109,10 +107,7 @@ export default {
       this.$router.push({path: '/play/' + this.courseId + '/' + videoId})
     },
     buy() {
-
-    },
-    see() {
-
+      this.$router.push({path: '/trade/' + this.courseId})
     }
   }
 };
