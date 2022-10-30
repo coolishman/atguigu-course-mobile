@@ -39,12 +39,11 @@ const routes = [
         component: () =>
             import('../views/CourseDetail'),
     },
-    // {
-    //     path: '/play/:courseId/:videoId',
-    //     name: 'Play',
-    //     component: () =>
-    //         import('../views/play.vue'),
-    // },
+    {
+        path: '/play/:courseId/:videoId',
+        name: 'Play',
+        component: () => import('../views/Play'),
+    },
     // {
     //     path: '/trade/:courseId',
     //     name: 'Trade',

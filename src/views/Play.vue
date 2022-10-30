@@ -1,35 +1,12 @@
 <template>
   <div>
-    <van-image width="100%" height="200" :src="course.cover"/>
-    <!-- 课程数据 -->
-    <van-row>
-      <van-col span="8">
-        <div class="course_count">
-          <h1>购买量</h1>
-          <p>{{ course.buyCount }}</p>
-        </div>
-      </van-col>
-      <van-col span="8">
-        <div class="course_count">
-          <h1>课时数</h1>
-          <p>{{ course.lessonNum }}</p>
-        </div>
-      </van-col>
-      <van-col span="8">
-        <div class="course_count">
-          <h1>浏览量</h1>
-          <p>{{ course.viewCount }}</p>
-        </div>
-      </van-col>
-    </van-row>
-
+    <video id="player-container-id" preload="auto" width="600" height="400" playsinline webkit-playsinline x5-playsinline></video>
     <h1 class="van-ellipsis course_title">{{ course.title }}</h1>
-
-    <!-- 购买课程 -->
     <div class="course_teacher_price_box">
       <div class="course_teacher_price">
         <div class="course_price">价格：</div>
         <div class="course_price_number">￥{{ course.price }}</div>
+        <div class="course_teacher">主讲： {{ course.teacherName }}</div>
       </div>
       <div>
         <van-button @click="see()" v-if="isBuy" plain type="warning" size="mini">前往观看</van-button>
@@ -39,80 +16,97 @@
       </div>
     </div>
 
-    <!-- 讲师信息 -->
-    <div class="course_teacher_price_box">
-      <div class="course_teacher_box">
-        <div class="course_teacher">主讲： {{ course.teacherName }}</div>
-        <van-image :src="course.teacherAvatar" round width="50px" height="50px"/>
-      </div>
-    </div>
-
     <div class="course_contents">
-      <div class="course_title_font">课程详情</div>
-      <van-divider :style="{ margin: '5px 0 ' }"/>
-      <div class="course_content" v-html="course.description">
-      </div>
-
       <div class="course_title_font">课程大纲</div>
       <div class="gap"></div>
       <van-collapse v-model="activeNames">
         <van-collapse-item :title="item.title" :name="item.id" v-for="item in chapterVoList" :key="item.id">
           <ul class="course_chapter_list" v-for="child in item.videos" :key="child.id">
-            <h2>{{ child.title }}</h2>
+            <h2 :style="activeVideoId === child.id ? 'color: blue' : ''">{{ child.title }}</h2>
             <p v-if="child.isFree === 1">
-              <van-button @click="play(child)" type="warning" size="mini" plain>免费观看</van-button>
+              <van-button @click="see(child)" type="warning" size="mini" plain>免费观看</van-button>
             </p>
             <p v-else>
-              <van-button @click="play(child)" type="warning" size="mini" plain>前往观看</van-button>
+              <van-button @click="see(child)" type="warning" size="mini" plain>前往观看</van-button>
             </p>
           </ul>
         </van-collapse-item>
       </van-collapse>
     </div>
 
-    <van-loading vertical="true" v-show="loading">加载中...</van-loading>
+    <van-loading :vertical="loading" v-show="loading">加载中...</van-loading>
   </div>
 </template>
 
-
 <script>
 import courseApi from '../api/course'
+import vodApi from '../api/vod'
+
 
 export default {
   data() {
     return {
       loading: false,
       courseId: null,
+      videoId: null,
       course: {},
       chapterVoList: [],
       isBuy: false,
-      activeNames: ["1"]
+      // 记录展开的章节 ID
+      activeNames: ["1"],
+      // 记录当前正在播放的视频
+      activeVideoId: 0,
+      player: null
     };
   },
 
   created() {
     this.courseId = this.$route.params.courseId;
+    this.videoId = this.$route.params.videoId || '1';
     this.fetchData();
+    this.getPlayAuth(this.videoId);
   },
 
   methods: {
+    // 查询课程信息
     fetchData() {
       this.loading = true;
       courseApi.courseDetail(this.courseId).then(response => {
         this.course = response.data;
-        this.chapterVoList = response.data.chapters;
+        this.chapterVoList = response.data.chapters
         this.loading = false;
       });
     },
-    play(video) {
+    // 观看视频
+    see(video) {
       let videoId = video.id;
-      this.$router.push({path: '/play/' + this.courseId + '/' + videoId})
+      this.getPlayAuth(videoId);
     },
     buy() {
 
     },
-    see() {
+    getPlayAuth(videoId) {
+      if (this.player != null) {
+        this.player.dispose();
+      }
 
+      vodApi.getVideo(videoId).then(response => {
+        // 展开章节
+        this.activeNames = [response.data.chapterId]
+        // 选中播放视频
+        this.activeVideoId = response.data.videoId
+        // 播放视频
+        this.play(response.data);
+      })
+    },
+    //视频播放
+    play(data) {
+      this.player = TCPlayer("player-container-id", {
+        /* player-container-id 为播放器容器ID，必须与 html 中一致 */
+        fileID: data.videoSourceId, /* 请传入需要播放的视频 fileID */
+        appID: data.appId, /* 请传入点播账号的子应用 appID */
+        psign: "" /*其他参数请在开发文档中查看 */
+      })
     }
   }
 };
@@ -169,16 +163,6 @@ export default {
 
     .course_teacher {
       margin-left: 20px;
-    }
-  }
-
-  .course_teacher_box {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    .course_teacher {
-      margin-right: 20px;
     }
   }
 }

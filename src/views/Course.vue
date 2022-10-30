@@ -4,8 +4,9 @@
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
       <!-- offset：滚动条与底部距离小于 offset 时触发 load 事件 默认 300，因此要改小，否则首次进入一直触发  -->
       <van-list v-model="loading" :finished="finished" finished-text="没有更多了" offset="10" @load="onLoad">
-        <van-card v-for="(item,index) in list" :key="index" :price="item.price" :title="item.title" :thumb="item.cover">
+        <van-card v-for="(item,index) in list" :key="index" :title="item.title" :thumb="item.cover">
           <template #tags>
+            <br/>
             <van-tag round plain color="#ffe1e1" text-color="#ad0000">课时数：{{ item.lessonNum }}</van-tag>
             <br/>
             <van-tag round plain color="#ffe1e1" text-color="#ad0000">购买数：{{ item.buyCount }}</van-tag>
